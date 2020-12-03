@@ -72,7 +72,7 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
         Interval Matrix : 2-d array
             Matrix denoting filled intervals
         """
-        tic = time()
+
         bin_ids = (projections * self.num_bins).astype(np.int)
         # Last entry is a dummy, hence + 2
 
@@ -91,7 +91,7 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
             B = bin_ids[:, I] - k
             B[B < 0] = self.num_bins + 1  # store in the dummy entry
             left_intervals[I, B] = np.maximum(left_intervals[I, B], self.bin_factor - k)
-        toc = (time() - tic) / 60
+
         return left_intervals, right_intervals
 
     def _achlioptas_dist(self, shape):
@@ -117,7 +117,11 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
         return min_mat, max_mat
 
     def scale(self, projections, min_mat, max_mat):
-        projections = (projections - min_mat) / (max_mat - min_mat)
+        useful_dims = np.where(self.min_mat!=self.max_mat)
+        useless_dims = np.where(self.min_mat==self.max_mat)
+        
+        projections[:, useful_dims] = (projections[:, useful_dims] - min_mat[useful_dims]) / (max_mat[useful_dims] - min_mat[useful_dims])
+        projections[:, useless_dims] = 0
         return projections
 
     def unscale(self, projections, min_mat, max_mat):
@@ -125,32 +129,24 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
         return projections
 
     def initalize_dict(self, x):
-        tic = time()
         non_zero_dims = np.where(x.getnnz(axis=0) != 0)[0]
         n_non_zero = non_zero_dims.shape[0]
-        toc = (time() - tic) * 1000 / x.shape[0]
 
-        tic = time()
         t = self._achlioptas_dist(shape=(self.num_clf_dim, n_non_zero))
         full_dict = scipy.sparse.csc_matrix((self.num_clf_dim, self.feature_len))
         full_dict[:, non_zero_dims] = t
 
-        toc = (time() - tic) * 1000 / x.shape[0]
 
         return full_dict
 
     def project_parallel(self, x):
-
-        tic = time()
         projections = self.kernel(x, self.clf_dirs)  # shape should be NxD
-        toc = (time() - tic) * 1000 / x.shape[0]
 
         return projections
 
     def scale_and_fit_intervals(self, projections):
-        tic = time()
         projections = self.scale(projections, self.min_mat, self.max_mat)
-        toc = (time() - tic) / 60
+
         return self.get_intervals(projections)
 
     def fit(self, x, y=None):
@@ -175,12 +171,11 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
             )
         else:
             self.clf_dirs = np.zeros((self.num_clf_dim, self.feature_len))
-
+        x = self.__split_data(x, self.n_jobs)
         with multiprocessing.Pool(processes=self.n_jobs) as pool:
-            tic = time()
+
             d = pool.map(self.initalize_dict, x)
-            toc = (time() - tic) / 60
-            tic = time()
+
             k = 0
             for batch_dict in d:
                 k += 1
@@ -193,34 +188,26 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
             self.clf_dirs[
                 self.clf_dirs < -np.sqrt(s) / np.sqrt(n_components)
             ] = -np.sqrt(s) / np.sqrt(n_components)
-            toc = (time() - tic) / 60
-            tic = time()
-            projections = None
+
             #             with multiprocessing.Pool() as pool:
             projections = pool.map(self.project_parallel, x)
-            toc = (time() - tic) / 60
 
-            tic = time()
             min_mat, max_mat = self.get_scalars(projections)
             self.min_mat, self.max_mat = min_mat, max_mat
-            toc = (time() - tic) / 60
 
-            tic = time()
             #             with multiprocessing.Pool() as pool:
             intervals_arr = pool.map(self.scale_and_fit_intervals, projections)
             #         intervals_arr = []
             #         for i in range(len(projections)):
             #             intervals_arr.append(self.scale_and_fit_intervals(projections[i]))
-            toc = (time() - tic) / 60
 
-        tic = time()
         self.left_intervals = intervals_arr[0][0]
         self.right_intervals = intervals_arr[0][1]
 
         for i in range(1, len(intervals_arr)):
             self.left_intervals = np.maximum(self.left_intervals, intervals_arr[i][0])
             self.right_intervals = np.maximum(self.right_intervals, intervals_arr[i][1])
-        toc = (time() - tic) / 60
+
         self.is_fitted_ = True
         return self
 
@@ -238,7 +225,6 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
             self.max_mat[:, bin_indices[0]],
         )
         # select non-zero columns for initialization
-        tic = time()
         non_zero_dims = np.where(x.getnnz(axis=0) != 0)[0]
         if self.__sparse:
             non_zero_dims = non_zero_dims[
@@ -253,17 +239,13 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
         n_non_zero = non_zero_dims.shape[0]
 
         # get the new projections
-        tic = time()
+
         t = self._achlioptas_dist(shape=(self.num_clf_dim, n_non_zero))
-        toc = (time() - tic) * 1000 / x.shape[0]
 
-        tic = time()
         self.clf_dirs[:, non_zero_dims] = t
-        toc = (time() - tic) * 1000 / x.shape[0]
 
-        tic = time()
         projections = self.kernel(x, self.clf_dirs)  # shape should be NxD
-        toc = (time() - tic) * 1000 / x.shape[0]
+
 
         # get the new min and max matrices
         new_min, new_max = self.get_scalars(projections)
@@ -275,7 +257,7 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
         # scale
         new_proj = self.scale(projections, self.min_mat, self.max_mat)
 
-        tic = time()
+
         self.get_intervals(new_proj)
 
     def clip(self, projections):
@@ -318,10 +300,9 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
         return scores
 
     def initialize_dict_test(self, x):
-        tic = time()
+
         non_zero_dims = np.where(x.getnnz(axis=0) != 0)[0]
-        toc = (time() - tic) / 60
-        tic = time()
+
         if self.__sparse:
             non_zero_dims = non_zero_dims[
                 np.where(self.clf_dirs[:, non_zero_dims].getnnz(axis=0) == 0)[0]
@@ -333,13 +314,13 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
                 )[0]
             ]
         n_non_zero = non_zero_dims.shape[0]
-        toc = (time() - tic) / 60
+
         t = self._achlioptas_dist(shape=(self.num_clf_dim, n_non_zero))
         full_dict = scipy.sparse.csc_matrix((self.num_clf_dim, self.feature_len))
 
-        tic = time()
+
         full_dict[:, non_zero_dims] = t
-        toc = (time() - tic) / 60
+
         return full_dict
 
     def decision_function(self, x):
@@ -355,12 +336,11 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
         1d-array - float
             Agreement fraction of points in x
         """
+        x = self.__split_data(x, self.n_jobs)
         with multiprocessing.Pool(processes=self.n_jobs) as pool:
-            tic = time()
-            d = pool.map(self.initialize_dict_test, x)
-            toc = (time() - tic) / 60
 
-            tic = time()
+            d = pool.map(self.initialize_dict_test, x)
+
             k = 0
             for batch_dict in d:
                 self.clf_dirs += batch_dict
@@ -374,14 +354,10 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
                 self.clf_dirs < -np.sqrt(s) / np.sqrt(n_components)
             ] = -np.sqrt(s) / np.sqrt(n_components)
 
-            toc = (time() - tic) / 60
-
-            tic = time()
-            #             with multiprocessing.Pool() as pool:
             scores = pool.map(self.decide_parallel, x)
-            toc = (time() - tic) / 60
 
-        return scores
+        
+        return np.concatenate(scores, axis=0)
 
     def predict(self, x):
         """Predictions of FROCC on test set x
@@ -431,3 +407,10 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
 
     def __sizeof__(self):
         return self.size()
+
+    def __split_data(self, X, n_batches):
+        x_list = []
+        m = int(X.shape[0]/n_batches)
+        for i in range(n_batches):
+            x_list.append(X[i*m:(i+1)*m])
+        return x_list

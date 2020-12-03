@@ -117,7 +117,7 @@ class DFROCC(BaseEstimator, OutlierMixin):
         self
             Fitted classifier
         """
-        x = self.precision(x)
+#         x = self.precision(x)
         self.feature_len = x.shape[1]
         self.clf_dirs = np.random.standard_normal(
             size=(self.num_clf_dim, self.feature_len)
@@ -152,7 +152,7 @@ class DFROCC(BaseEstimator, OutlierMixin):
         1d-array - float
             Agreement fraction of points in x
         """
-        x = self.precision(x)
+#         x = self.precision(x)
         projections = self.kernel(x, self.clf_dirs)
         projections = self.scale(projections)
 
