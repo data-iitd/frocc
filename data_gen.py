@@ -15,10 +15,10 @@ def himoon():
     x, y = skds.make_moons(n_samples=n_samples * 2)
     x_p = x[y == 1]
     x_pos = sp.csr_matrix((n_samples, n_dims))
-    x_pos[:, :2] = x_p
+    x_pos[:, : x.shape[1]] = x_p
     x_n = x[y == 0]
     x_neg = sp.csr_matrix((int(n_samples * 0.3), n_dims))
-    x_neg[:, :2] = x_n[: int(n_samples * 0.3)]
+    x_neg[:, : x.shape[1]] = x_n[: int(n_samples * 0.3)]
     x_train = x_pos[: int(n_samples * 0.7)]
     x_val = sp.vstack(
         (
