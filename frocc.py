@@ -115,7 +115,6 @@ class FROCC(BaseEstimator, OutlierMixin):
         self
             Fitted classifier
         """
-        x = self.precision(x)
         x = check_array(x)
         self.feature_len = len(x[0])
         clf_dirs = np.random.standard_normal(size=(self.num_clf_dim, self.feature_len))
@@ -143,7 +142,6 @@ class FROCC(BaseEstimator, OutlierMixin):
         1d-array - float
             Agreement fraction of points in x
         """
-        x = self.precision(x)
         projections = self.kernel(x, self.clf_dirs)
         scores = []
         for v in projections:
