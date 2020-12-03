@@ -180,7 +180,6 @@ class SDFROCC(BaseEstimator, OutlierMixin):
         with multiprocessing.Pool() as pool:
             d = pool.map(self.initalize_dict, x)
         toc = (time() - tic) / 60
-        print("Time for initalizing dictionary (a) + (b) ", toc, " min")
         tic = time()
         k = 0
         for batch_dict in d:
@@ -195,26 +194,22 @@ class SDFROCC(BaseEstimator, OutlierMixin):
             s
         ) / np.sqrt(n_components)
         toc = (time() - tic) / 60
-        print("Time for aggregating dictionary (c) ", toc, "min")
 
         tic = time()
         projections = None
         with multiprocessing.Pool() as pool:
             projections = pool.map(self.project_parallel, x)
         toc = (time() - tic) / 60
-        print("Time for projections (d) ", toc, "min")
 
         tic = time()
         min_mat, max_mat = self.get_scalars(projections)
         self.min_mat, self.max_mat = min_mat, max_mat
         toc = (time() - tic) / 60
-        print("Time for aggregating scalars (e) ", toc, "min")
 
         tic = time()
         with multiprocessing.Pool() as pool:
             intervals_arr = pool.map(self.scale_and_fit_intervals, projections)
         toc = (time() - tic) / 60
-        print("Time for scaling and fitting intervals  (f) ", toc, "min")
 
         tic = time()
         self.left_intervals = intervals_arr[0][0]
@@ -224,7 +219,6 @@ class SDFROCC(BaseEstimator, OutlierMixin):
             self.left_intervals = np.maximum(self.left_intervals, intervals_arr[i][0])
             self.right_intervals = np.maximum(self.right_intervals, intervals_arr[i][1])
         toc = (time() - tic) / 60
-        print("Time for aggregating intervals (g) ", toc, "min")
         self.is_fitted_ = True
         return self
 
@@ -325,7 +319,6 @@ class SDFROCC(BaseEstimator, OutlierMixin):
         tic = time()
         non_zero_dims = np.where(x.getnnz(axis=0) != 0)[0]
         toc = (time() - tic) / 60
-        print("nnz time ", toc)
         tic = time()
         if self.__sparse:
             non_zero_dims = non_zero_dims[
@@ -339,14 +332,12 @@ class SDFROCC(BaseEstimator, OutlierMixin):
             ]
         n_non_zero = non_zero_dims.shape[0]
         toc = (time() - tic) / 60
-        print("Time for selecting non-zeros ", toc)
         t = self._achlioptas_dist(shape=(self.num_clf_dim, n_non_zero))
         full_dict = scipy.sparse.csc_matrix((self.num_clf_dim, self.feature_len))
 
         tic = time()
         full_dict[:, non_zero_dims] = t
         toc = (time() - tic) / 60
-        print("Time for assigning ", toc)
         return full_dict
 
     def decision_function(self, x):
@@ -362,13 +353,10 @@ class SDFROCC(BaseEstimator, OutlierMixin):
         1d-array - float
             Agreement fraction of points in x
         """
-        print()
         tic = time()
         with multiprocessing.Pool() as pool:
             d = pool.map(self.initialize_dict_test, x)
         toc = (time() - tic) / 60
-
-        print("Time for initializing dictionary ", toc, " min")
 
         tic = time()
         k = 0
@@ -385,13 +373,11 @@ class SDFROCC(BaseEstimator, OutlierMixin):
         ) / np.sqrt(n_components)
 
         toc = (time() - tic) / 60
-        print("Time for aggregating dictionary ", toc, "min")
 
         tic = time()
         with multiprocessing.Pool() as pool:
             scores = pool.map(self.decide_parallel, x)
         toc = (time() - tic) / 60
-        print("Time for deciding parallely ", toc, "min")
 
         return scores
 
