@@ -28,10 +28,7 @@ x = np.array(x, dtype=np.float32) # for dense data
 x = sp.csc_matric(x, dtype=np.float32) # for sparse data
 ```
 
-For more information of data loading, see Sparse matric docs [1] and Numpy array docs [2],
-
-[1]: https://docs.scipy.org/doc/scipy/reference/sparse.html
-[2]: https://docs.scipy.org/doc/numpy-1.14.0/reference/arrays.html
+For more information of data loading, see [[Sparse matrix docs](https://docs.scipy.org/doc/scipy/reference/sparse.html)]and [[Numpy array docs](https://docs.scipy.org/doc/numpy-1.14.0/reference/arrays.html)].
 
 ## Generating synthetic data
 
