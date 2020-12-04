@@ -28,11 +28,11 @@ x_train, y_train, x_val, y_val, x_test, y_test = data_gen.himoon(n_samples=1000,
 
 Parameters:
 
-`n_samples` - Total number of generated samples
+`n_samples` - Total number of generated samples (Default: 1000)
 
-`n_dims` - Number of dimensions of generated data
+`n_dims` - Number of dimensions of generated data  (Default: 1000)
 
-`sparsity` - Sparsity of the generated data
+`sparsity` - Sparsity of the generated data  (Default: 0.01)
 
 ## Running synthetic generated data
 
