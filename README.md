@@ -28,10 +28,10 @@ x = np.array(x, dtype=np.float32) # for dense data
 x = sp.csc_matric(x, dtype=np.float32) # for sparse data
 ```
 
-For more information of data loading, see [^1] and [^2]
+For more information of data loading, see Sparse matric docs [1] and Numpy array docs [2],
 
-[^1]: https://docs.scipy.org/doc/scipy/reference/sparse.html
-[^2]: https://docs.scipy.org/doc/numpy-1.14.0/reference/arrays.html
+[1]: https://docs.scipy.org/doc/scipy/reference/sparse.html
+[2]: https://docs.scipy.org/doc/numpy-1.14.0/reference/arrays.html
 
 ## Generating synthetic data
 
@@ -80,3 +80,6 @@ Parameters:
  ```
  python experiment.py --dataset himoon --epsilon 0.01 --dimension 100 --n_samples 100000 --n_dim 100000 --method pardfrocc --repetitions 1 --outfile himoon_results.csv
  ```
+
+## Disclaimer
+This is released as a research prototype. It is not meant to be a production quality implementation. It has been made open source to enable easy reproducibility of research results. If you are interested in using this in a production, please send an email to bagchi@cse.iitd.ac.in
