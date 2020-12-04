@@ -13,7 +13,9 @@ def himoon(n_samples=1000, n_dims=1000, sparsity=0.01, dist=5):
     # dist = 5
     # sparsity = 0.01
     x, y = skds.make_moons(n_samples=n_samples * 2)
-    x = np.hstack((x, dist * np.ones((n_samples * 2, int(n_samples * sparsity - 2)))))
+    x = np.hstack(
+        (x, dist * np.ones((n_samples * 2, int(n_dims * sparsity - x.shape[1]))))
+    )
     x_p = x[y == 1]
     x_pos = sp.csr_matrix((n_samples, n_dims))
     x_pos[:, : x.shape[1]] = x_p

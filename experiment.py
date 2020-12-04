@@ -12,6 +12,7 @@ import dfrocc
 import sparse_dfrocc
 import pardfrocc
 import kernels as k
+
 # import utils
 
 parser = argparse.ArgumentParser()
@@ -23,16 +24,20 @@ parser.add_argument("--kernel", default="linear")
 parser.add_argument("--repetitions", default=1, type=int)
 parser.add_argument("--outfile", default="results/out.csv")
 parser.add_argument("--method", default="pardfrocc")
-parser.add_argument("--n_samples", default=1000)
-parser.add_argument("--n_dims", default=1000)
+parser.add_argument("--n_samples", default=1000, type=int)
+parser.add_argument("--n_dims", default=1000, type=int)
 
 args = parser.parse_args()
 
 if args.dataset == "himoon":
-    x, y, _, _, xtest, ytest = data_gen.himoon(n_samples = args.n_samples, n_dims = args.n_dims)
+    x, y, _, _, xtest, ytest = data_gen.himoon(
+        n_samples=args.n_samples, n_dims=args.n_dims
+    )
 
 elif args.dataset == "mmgauss":
-    x, y, _, _, xtest, ytest = data_gen.mmgauss(n_samples = args.n_samples, n_dims = args.n_dims)
+    x, y, _, _, xtest, ytest = data_gen.mmgauss(
+        n_samples=args.n_samples, n_dims=args.n_dims
+    )
 else:
     raise ValueError("Unknown dataset")
 
@@ -61,21 +66,21 @@ for run in range(args.repetitions):
         f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}: Run {run + 1} of "
         + f"{args.repetitions}"
     )
-    if args.method == 'frocc':
+    if args.method == "frocc":
         clf = frocc.FROCC(
             num_clf_dim=args.dimension, epsilon=args.epsilon, kernel=kernel
         )
         x = x.toarray()
         xtest = xtest.toarray()
-    elif args.method == 'dfrocc':
+    elif args.method == "dfrocc":
         clf = dfrocc.DFROCC(
             num_clf_dim=args.dimension, epsilon=args.epsilon, kernel=kernel
         )
-    elif args.method == 'sparse_dfrocc':
+    elif args.method == "sparse_dfrocc":
         clf = sparse_dfrocc.SDFROCC(
             num_clf_dim=args.dimension, epsilon=args.epsilon, kernel=kernel
         )
-    elif args.method == 'pardfrocc':
+    elif args.method == "pardfrocc":
         clf = pardfrocc.ParDFROCC(
             num_clf_dim=args.dimension, epsilon=args.epsilon, kernel=kernel
         )
