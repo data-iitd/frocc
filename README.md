@@ -17,6 +17,20 @@ roc = roc_auc_score(y_test, scores)
 
 predictions = clf.predict(x_test)
 ```
+## Generating synthetic data
+
+We provide a script for generating HiMoon and MMGauss dataset.
+
+```python
+import data_gen
+x_train, y_train, x_val, y_val, x_test, y_test = data_gen.himoon(n_samples=1000, n_dims=1000) #or data_gen.mmgauss()
+```
+
+Parameters:
+`n_samples` - Total number of generated samples
+`n_dims` - Number of dimensions of generated data
+`sparsity` - Sparsity of the generated data
+
 ## Running synthetic generated data
 
  ```
