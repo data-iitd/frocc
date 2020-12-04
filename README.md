@@ -2,7 +2,7 @@
 
 ## Running PardFROCC
 
-`PardFROCC` (and other versions) adheres to `sklearn` estimator interface. `PardFROCC` and `Sparse DFROCC` expects sparse matrices in CSR format. Other methods expect `numpy` arrays.
+`PardFROCC` (and other versions) adheres to `sklearn` estimator interface. `PardFROCC` and `Sparse DFROCC` expects sparse matrices in CSC format. Other methods expect `numpy` arrays. The arrays can be `float` or `int` types.
 
 ```python
 import pardfrocc
@@ -17,6 +17,22 @@ roc = roc_auc_score(y_test, scores)
 
 predictions = clf.predict(x_test)
 ```
+
+Any numeric data file can be converted to required format as follows:
+
+```python
+import numpy as np
+import scipy.sparse as sp
+
+x = np.array(x, dtype=np.float32) # for dense data
+x = sp.csc_matric(x, dtype=np.float32) # for sparse data
+```
+
+For more information of data loading, see [^1] and [^2]
+
+[^1]: https://docs.scipy.org/doc/scipy/reference/sparse.html
+[^2]: https://docs.scipy.org/doc/numpy-1.14.0/reference/arrays.html
+
 ## Generating synthetic data
 
 We provide a script for generating HiMoon and MMGauss dataset.
@@ -47,6 +63,8 @@ Parameters:
  `epsilon` - Seperation parameter. Typically of the order 0.1-0.0001 (Default: 0.01)
 
  `dimension` - Number of FROCC dimensions (Default: 1000)
+
+`kernel`
 
  `n_samples` - Number of samples to generate *when using generated data* (Default: 1000)
 
