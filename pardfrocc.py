@@ -119,7 +119,7 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
     def scale(self, projections, min_mat, max_mat):
         useful_dims = np.where(self.min_mat!=self.max_mat)
         useless_dims = np.where(self.min_mat==self.max_mat)
-        
+
         projections[:, useful_dims] = (projections[:, useful_dims] - min_mat[useful_dims]) / (max_mat[useful_dims] - min_mat[useful_dims])
         projections[:, useless_dims] = 0
         return projections
@@ -164,6 +164,7 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
         self
             Fitted classifier
         """
+        x = self.__split_data(x, self.n_jobs)
         self.feature_len = x[0].shape[1]
         if self.__sparse:
             self.clf_dirs = scipy.sparse.csc_matrix(
@@ -171,7 +172,6 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
             )
         else:
             self.clf_dirs = np.zeros((self.num_clf_dim, self.feature_len))
-        x = self.__split_data(x, self.n_jobs)
         with multiprocessing.Pool(processes=self.n_jobs) as pool:
 
             d = pool.map(self.initalize_dict, x)
@@ -356,7 +356,7 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
 
             scores = pool.map(self.decide_parallel, x)
 
-        
+
         return np.concatenate(scores, axis=0)
 
     def predict(self, x):
