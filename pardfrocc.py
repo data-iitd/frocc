@@ -1,10 +1,12 @@
+import math
+import multiprocessing
+from time import time
 from typing import Type
+
 import numpy as np
+import scipy
 from sklearn.base import BaseEstimator, OutlierMixin
 from sklearn.preprocessing import MinMaxScaler
-from time import time
-import scipy
-import multiprocessing
 
 
 class ParDFROCC(BaseEstimator, OutlierMixin):
@@ -410,7 +412,7 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
 
     def __split_data(self, X, n_batches):
         x_list = []
-        m = int(X.shape[0]/n_batches)
+        m = int(math.ceil(X.shape[0] / n_batches))
         for i in range(n_batches):
             x_list.append(X[i*m:(i+1)*m])
         return x_list
