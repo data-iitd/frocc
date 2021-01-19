@@ -7,7 +7,7 @@ import numpy as np
 import scipy
 from sklearn.base import BaseEstimator, OutlierMixin
 from sklearn.preprocessing import MinMaxScaler
-
+from sklearn.metrics.pairwise import linear_kernel
 
 class ParDFROCC(BaseEstimator, OutlierMixin):
     """FROCC classifier
@@ -43,7 +43,7 @@ class ParDFROCC(BaseEstimator, OutlierMixin):
         threshold: float = 1,
         bin_factor: int = 2,
         density: float = 0.01,
-        kernel: Type[np.dot] = lambda x, y: x.dot(y.T),
+        kernel: Type[np.dot] = linear_kernel,
         precision: type = np.float32,
         n_jobs: int = 8,
     ):
