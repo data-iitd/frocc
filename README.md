@@ -79,4 +79,4 @@ Parameters:
  ```
 
 ## Disclaimer
-This is released as a research prototype. It is not meant to be a production quality implementation. It has been made open source to enable easy reproducibility of research results. If you are interested in using this in a production, please send an email to data.cse.iitd@gmail.com.
+This is released as a research prototype. It is not meant to be a production quality implementation. It has been made open source to enable easy reproducibility of research results.
